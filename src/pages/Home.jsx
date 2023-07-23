@@ -1,26 +1,61 @@
-import React from "react";
+import axios, { Axios } from "axios";
+import React, { useEffect, useState } from "react";
 import FilterCheckbox from "../components/FilterCheckbox";
 import JobCard from "../components/jobCard";
 
 function Home() {
-  const jobs = [
-    {
-      id: 1,
-      title: "Fullstack Next",
-      description: "- Lorem\n- Lorem ipsum\n- Lore",
-    },
-    {
-      id: 2,
-      title: "Backend Developer",
-      description: "- Lorem\n- Lorem ipsum\n- Lore",
-    },
+  const [Jobs, SetJobs] = useState([]);
+  const [TypeFilter, SetTypeFilter] = useState([]);
+  const [LevelFilter, SetLevelFilter] = useState([]);
+  const baseUrl = "http://localhost:8080/api/v1/jobs";
 
-    {
-      id: 3,
-      title: "AI Engineer",
-      description: "- Lorem\n- Lorem ipsum\n- Lore",
-    },
-  ];
+  const FetchJobs = async () => {
+    try {
+      let filter = "";
+      if (TypeFilter.length > 0) {
+        filter += `${filter ? "&" : "?"}type=${TypeFilter.join()}`;
+      }
+
+      if (LevelFilter.length > 0) {
+        filter += `${filter ? "&" : "?"}level=${LevelFilter.join()}`;
+      }
+
+      const jobs = await axios.get(baseUrl + filter);
+      SetJobs(jobs.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const OnTypeFilterAdd = (typeFilterName) => {
+    const filter = [...TypeFilter, typeFilterName];
+    SetTypeFilter(filter);
+  };
+
+  const OnTypeFilterRemove = (typeFilterName) => {
+    const filter = TypeFilter.filter(
+      (filtername) => filtername !== typeFilterName
+    );
+    SetTypeFilter(filter);
+  };
+
+  const OnLevelFilterAdd = (levelFilterName) => {
+    const filter = [...LevelFilter, levelFilterName];
+    SetLevelFilter(filter);
+  };
+
+  const OnLevelFilterRemove = (levelFilterName) => {
+    const filter = LevelFilter.filter(
+      (filtername) => filtername !== levelFilterName
+    );
+    SetLevelFilter(filter);
+  };
+
+  useEffect(() => FetchJobs, []);
+  useEffect(
+    () => FetchJobs,
+    [OnTypeFilterAdd, OnTypeFilterRemove, OnLevelFilterAdd, OnLevelFilterRemove]
+  );
 
   return (
     <>
@@ -38,21 +73,61 @@ function Home() {
             <div className="flex flex-col gap-y-1 p-1">
               <h3 className="font-semibold">Employement Type</h3>
               <div className="grid grid-cols-3 lg:grid-cols-1 lg:gap-y-3">
-                <FilterCheckbox filterName="Contract" />
-                <FilterCheckbox filterName="Internship" />
-                <FilterCheckbox filterName="Full-time" />
-                <FilterCheckbox filterName="Temporary" />
-                <FilterCheckbox filterName="Part-time" />
+                <FilterCheckbox
+                  onAddFilter={OnTypeFilterAdd}
+                  onRemoveFilter={OnTypeFilterRemove}
+                  filterName="Contract"
+                />
+                <FilterCheckbox
+                  onAddFilter={OnTypeFilterAdd}
+                  onRemoveFilter={OnTypeFilterRemove}
+                  filterName="Internship"
+                />
+                <FilterCheckbox
+                  onAddFilter={OnTypeFilterAdd}
+                  onRemoveFilter={OnTypeFilterRemove}
+                  filterName="Full-time"
+                />
+                <FilterCheckbox
+                  onAddFilter={OnTypeFilterAdd}
+                  onRemoveFilter={OnTypeFilterRemove}
+                  filterName="Temporary"
+                />
+                <FilterCheckbox
+                  onAddFilter={OnTypeFilterAdd}
+                  onRemoveFilter={OnTypeFilterRemove}
+                  filterName="Part-time"
+                />
               </div>
             </div>
             <div className="flex flex-col gap-y-1 p-1 lg:mt-10">
               <h3 className="font-semibold">Position Level</h3>
               <div className="grid lg:gap-y-3">
-                <FilterCheckbox filterName="CEO/GM/Direktur/Manajer Senior" />
-                <FilterCheckbox filterName="Manajer/Asisten Manajer" />
-                <FilterCheckbox filterName="Supervisor/Koordinator" />
-                <FilterCheckbox filterName="Pegawai non-manajemen & non-supervisor" />
-                <FilterCheckbox filterName="Lulusan baru/Pengalaman kerja kurang dari 1 tahun" />
+                <FilterCheckbox
+                  onAddFilter={OnLevelFilterAdd}
+                  onRemoveFilter={OnLevelFilterRemove}
+                  filterName="CEO/GM/Direktur/Manajer Senior"
+                />
+                <FilterCheckbox
+                  onAddFilter={OnLevelFilterAdd}
+                  onRemoveFilter={OnLevelFilterRemove}
+                  filterName="Manajer/Asisten Manajer"
+                />
+                <FilterCheckbox
+                  onAddFilter={OnLevelFilterAdd}
+                  onRemoveFilter={OnLevelFilterRemove}
+                  filterName="Supervisor/Koordinator"
+                />
+                <FilterCheckbox
+                  onAddFilter={OnLevelFilterAdd}
+                  onRemoveFilter={OnLevelFilterRemove}
+                  filterName="Pegawai non-manajemen & non-supervisor"
+                />
+                <FilterCheckbox
+                  onAddFilter={OnLevelFilterAdd}
+                  onRemoveFilter={OnLevelFilterRemove}
+                  filterName="Lulusan baru/Pengalaman kerja kurang dari 1 tahun"
+                />
               </div>
             </div>
           </div>
@@ -61,13 +136,13 @@ function Home() {
         {/* Filter component end */}
 
         {/* Card component */}
-        <div className="grid gap-3 lg:grid-cols-3 lg:w-full lg:pl-6">
-          {jobs.map((e) => (
+        <div className="grid gap-3 h-fit lg:grid-cols-3 lg:w-full lg:pl-6">
+          {Jobs.map((e) => (
             <JobCard
               key={e.id}
               id={e.id}
               title={e.title}
-              description={e.description}
+              description={e.jobdesc}
             />
           ))}
         </div>
